@@ -1,0 +1,13 @@
+dist
+dist.zip
+node_modules
+text
+
+.DS_Store
+*.swp
+.svn
+.idea
+.buildpath
+.project
+.settings
+Thumbs.db

@@ -1,0 +1,37 @@
+{
+    "x":0,
+    "type":"View",
+    "selectedBox":1,
+    "selecteID":23,
+    "props":{"y":0,"x":0,"width":414,"oy":0,"ox":0,"height":736},
+    "nodeParent":-1,
+    "label":"View",
+    "isOpen":true,
+    "isDirectory":true,
+    "isAniNode":true,
+    "hasChild":true,
+    "compId":1,
+    "child":[
+        {
+            "x":15,
+            "type":"Image",
+            "props":{"y":141,"x":43,"width":328,"visible":true,"var":"play_background","skin":"view/play_background.png","oy":122,"ox":41,"ownType":"Image","name":"background","height":454,"alpha":1},
+            "nodeParent":1,
+            "label":"Image(play_background)",
+            "isDirectory":false,
+            "isAniNode":true,
+            "hasChild":false,
+            "compId":23,
+            "child":[
+                ]
+        }],
+    "animations":[
+        {
+            "nodes":[
+                ],
+            "name":"ani1",
+            "id":1,
+            "frameRate":24,
+            "action":0
+        }]
+}
