@@ -19,6 +19,6 @@ var viewUI=(function(_super){
 
 		}
 
-		viewUI.uiView={"type":"View","props":{"y":0,"x":0,"width":414,"oy":0,"ox":0,"height":736},"child":[{"type":"Image","props":{"y":141,"x":43,"width":328,"visible":true,"var":"play_background","skin":"view/play_background.png","oy":122,"ox":41,"ownType":"Image","name":"background","height":454,"alpha":1}}]};
+		viewUI.uiView={"type":"View","props":{"y":0,"x":0,"width":414,"oy":0,"ox":0,"height":736}};
 		return viewUI;
 	})(View);

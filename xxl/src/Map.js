@@ -12,13 +12,13 @@ class Map {
 		}
 	}
 	createMap() {
-		// åˆ›å»ºæ‰€æœ‰çš„Item
+		// ´´½¨ËùÓĞµÄItem
 		MapData = [];
-		// ç§»åŠ¨ã€æ‰è½çš„Item
+		// ÒÆ¶¯¡¢µôÂäµÄItem
 		list = [];
-		// åˆ é™¤çš„Item id
+		// É¾³ıµÄItem id
 		deleteList = [];
-		// ç”Ÿæˆåœ°å›¾
+		// Éú³ÉµØÍ¼
 		for (var i = 0; i < 6; i++) {
 			MapData[i] = [];
 			for (var j = 0; j < 5; j++) {
@@ -34,7 +34,7 @@ class Map {
 				game.addChild(MapData[i][j]).pos(50 + j * 60, 140 + i * 70);
 			}
 		}
-		// æ£€æµ‹åœ°å›¾
+		// ¼ì²âµØÍ¼
 		for (var i = 0; i < MapData.length; i++) {
 			for (var j = 0; j < MapData[i].length; j++) {
 
@@ -80,7 +80,7 @@ class Map {
 				}
 			}
 		}
-		console.log('é‡æ–°ç”Ÿæˆåœ°å›¾');
+		console.log('need to create new map');
 	}
 	randomType() {
 		return Math.floor(Math.random() * 4);
@@ -95,29 +95,33 @@ class Map {
     clickEvent() {
         clickItem.push(this);
         if (clickItem.length >= 2) {
-            // å°è¯•äº¤æ¢ä½ç½®
-            var x = clickItem[0].x;
-            var y = clickItem[0].y;
-            var id = clickItem[0].location;
-            var id2 = clickItem[1].location;
+            // ³¢ÊÔ½»»»Î»ÖÃ
+            var x0 = clickItem[0].x;
+            var y0 = clickItem[0].y;
+			var x1 = clickItem[1].x;
+            var y1 = clickItem[1].y;
+            var id0 = clickItem[0].location;
+            var id1 = clickItem[1].location;
+			
+            MapData[Math.floor(id0 / 5)][id0 % 5] = clickItem[1];
+            MapData[Math.floor(id1 / 5)][id1 % 5] = clickItem[0];
 
-            MapData[Math.floor(id / 5)][id % 5] = clickItem[1];
-            MapData[Math.floor(id2 / 5)][id2 % 5] = clickItem[0];
-
-            clickItem[0].pos(clickItem[1].x, clickItem[1].y);
-            clickItem[0].location = clickItem[1].location;
-            clickItem[1].pos(x, y);
-            clickItem[1].location = id;
+            clickItem[0].pos(x1, y1);
+			clickItem[1].pos(x0, y0);
+            clickItem[0].location = id1;
+            clickItem[1].location = id0;
             list.push(...clickItem);
-            clickItem = [];
+            clickItem.splice(0, clickItem.length);
             map.findItems();
         }
     }
 	findItems() {
 		deleteList.splice(0, deleteList.length);
         if(list.length == 0){
+			Laya.stage.mouseEnabled = true;
             return;
         }
+		Laya.stage.mouseEnabled = false;
 		for (var i = list.length - 1; i >= 0; i--) {
 			this.canDelete(list[i]);
 		}
@@ -126,26 +130,42 @@ class Map {
 		this.deleteItems();
 		this.dropItems();
 		this.newItems();
-        Laya.timer.once(600,this,function (){
-            map.findItems();
+        Laya.timer.once(200,this,function () {
+			this.updateMap();
+            this.findItems();
         });
+		deleteList.splice(0, deleteList.length);
 	}
 	canDelete(item, type) {
 		
 		item.deleteList1 = [];
-		if (item.location % 5 <= 3) {
-			this.canDeleteDirct(item, item.location + 1, typeof type == "number" ? type: item.type, 'left');
-		}
 		if (item.location % 5 >= 1) {
-			this.canDeleteDirct(item, item.location - 1, typeof type == "number" ? type: item.type, 'right');
+			this.canDeleteDirct(item, item.location - 1, typeof type == "number" ? type: item.type, 'left');
+		}
+		if (item.location % 5 <= 3) {
+			this.canDeleteDirct(item, item.location + 1, typeof type == "number" ? type: item.type, 'right');
 		}
 		item.deleteList1.push(item.location);
-		// å»é‡
 		item.deleteList1 = Array.from(new Set(item.deleteList1));
 		if (item.deleteList1.length >= 3) {
 			deleteList.push(...item.deleteList1);
 		}
-		item.deleteList1 = null;
+		item.deleteList1.splice(0,item.deleteList1.length);
+		
+		item.deleteList2 = [];
+		if (Math.floor(item.location / 5) <= 4) {
+			this.canDeleteDirct(item, item.location + 5, typeof type == "number" ? type: item.type, 'bottom');
+		}
+		if (Math.floor(item.location / 5) >= 1) {
+			this.canDeleteDirct(item, item.location - 5, typeof type == "number" ? type: item.type, 'top');
+		}
+		item.deleteList2.push(item.location);
+		item.deleteList2 = Array.from(new Set(item.deleteList2));
+		if (item.deleteList2.length >= 3) {
+			deleteList.push(...item.deleteList2);
+		}
+		item.deleteList2.splice(0,item.deleteList2.length);
+		
 	}
 	canDeleteDirct(item, id, type, direct) {
 		switch (direct) {
@@ -155,10 +175,10 @@ class Map {
 					return;
 				}
 				item.deleteList1.push(id);
-				if (id % 5 == 4 || id % 5 == 0) {
+				if (id % 5 <= 0) {
 					return;
 				}
-				this.canDeleteDirct(item, id + 1, type, 'left');
+				this.canDeleteDirct(item, id - 1, type, 'left');
 				break;
 
 			case 'right':
@@ -167,10 +187,34 @@ class Map {
 					return;
 				}
 				item.deleteList1.push(id);
-				if (id % 5 == 0 || id % 5 == 4) {
+				if (id % 5 >= 4) {
 					return;
 				}
-				this.canDeleteDirct(item, id - 1, type, 'right');
+				this.canDeleteDirct(item, id + 1, type, 'right');
+				break;
+				
+			case 'bottom':
+				var thisType = MapData[Math.floor(id / 5)][id % 5].type;
+				if (thisType != type) {
+					return;
+				}
+				item.deleteList2.push(id);
+				if (Math.floor(id / 5) >= 4) {
+					return;
+				}
+				this.canDeleteDirct(item, id + 5, type, 'bottom');
+				break;
+
+			case 'top':
+				var thisType = MapData[Math.floor(id / 5)][id % 5].type;
+				if (thisType != type) {
+					return;
+				}
+				item.deleteList2.push(id);
+				if (Math.floor(id / 5) <= 0) {
+					return;
+				}
+				this.canDeleteDirct(item, id - 5, type, 'top');
 				break;
 		}
 
@@ -185,7 +229,7 @@ class Map {
 	}
 	dropItems() {
 		dropCols = [];
-		// è¿‡æ»¤ 
+		// ¹ıÂË 
 		for (var index = 0; index < deleteList.length; index++) {
 			var element = deleteList[index];
 			var col = element % 5;
@@ -206,26 +250,25 @@ class Map {
 			var maxRow = drop[col].row;
 			var num = drop[col].num;
 			for (var i = maxRow - 1; i >= 0; i--) {
+				var item = MapData[i][col];
 				MapData[i][col].location += num * 5;
-				MapData[i + num][col] = MapData[i][col];
-                list.push(MapData[i + num][col]);
+				MapData[i + num][col] = item;
+                list.push(item);
 				var y = 140 + i * 70 + num * 70;
 				MapData[i][col].y = y - 40;
-				Laya.Tween.to(MapData[i + num][col], {
+				Laya.Tween.to(item, {
 					y: y
 				},
-				500);
+				100);
 			}
 		}
 	}
 	newItems() {
 		for (var index = 0; index < dropCols.length; index++) {
-			
 			var col = dropCols[index];
 			var maxRow = drop[col].row;
 			var num = drop[col].num;
-
-			for (var i = 0; i < num; i++) {
+			for (var i = num - 1; i >= 0; i--) {
 				MapData[i][col] = new Item();
 				MapData[i][col].type = map.randomType();
 				MapData[i][col].location = i * 5 + col;
@@ -233,10 +276,17 @@ class Map {
 				MapData[i][col].skin = 'view/play_img' + MapData[i][col].type + '.png';
 				game.addChild(MapData[i][col].pos(50 + col * 60, 100 + i * 70));
                 list.push(MapData[i][col]);
-                Laya.Tween.to(MapData[i][col],{y : 140 + i * 70},500);
+                Laya.Tween.to(MapData[i][col],{y : 140 + i * 70},150);
 			}
 			drop[col].row = 0;
 			drop[col].num = 0;
+		}
+	}
+	updateMap() {
+		for (var i = 0; i < MapData.length; i++) {
+			for (var j = 0; j < MapData[i].length; j++) {
+				MapData[i][j].pos(50 + j * 60, 140 + i * 70);
+			}
 		}
 	}
 };
