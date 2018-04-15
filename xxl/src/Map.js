@@ -12,13 +12,13 @@ class Map {
 		}
 	}
 	createMap() {
-		// 创建所有的Item
+		// 
 		MapData = [];
-		// 移动、掉落的Item
+		// 
 		list = [];
-		// 删除的Item id
+		// 
 		deleteList = [];
-		// 生成地图
+		// 
 		for (var i = 0; i < 6; i++) {
 			MapData[i] = [];
 			for (var j = 0; j < 5; j++) {
@@ -34,7 +34,7 @@ class Map {
 				game.addChild(MapData[i][j]).pos(50 + j * 60, 140 + i * 70);
 			}
 		}
-		// 检测地图
+		// 
 		for (var i = 0; i < MapData.length; i++) {
 			for (var j = 0; j < MapData[i].length; j++) {
 
@@ -95,7 +95,7 @@ class Map {
     clickEvent() {
         clickItem.push(this);
         if (clickItem.length >= 2) {
-            // 尝试交换位置
+            // 
             var x0 = clickItem[0].x;
             var y0 = clickItem[0].y;
 			var x1 = clickItem[1].x;
@@ -118,10 +118,12 @@ class Map {
 	findItems() {
 		deleteList.splice(0, deleteList.length);
         if(list.length == 0){
-			Laya.stage.mouseEnabled = true;
+			Laya.timer.callLater(this, function (){
+				game.mouseEnabled = true;
+			});
             return;
         }
-		Laya.stage.mouseEnabled = false;
+		game.mouseEnabled = false;
 		for (var i = list.length - 1; i >= 0; i--) {
 			this.canDelete(list[i]);
 		}
@@ -130,14 +132,13 @@ class Map {
 		this.deleteItems();
 		this.dropItems();
 		this.newItems();
-        Laya.timer.once(200,this,function () {
-			this.updateMap();
+		Laya.timer.once(100, this, this.updateMap);
+		deleteList.splice(0, deleteList.length);
+        Laya.timer.once(250,this,function () {
             this.findItems();
         });
-		deleteList.splice(0, deleteList.length);
 	}
 	canDelete(item, type) {
-		
 		item.deleteList1 = [];
 		if (item.location % 5 >= 1) {
 			this.canDeleteDirct(item, item.location - 1, typeof type == "number" ? type: item.type, 'left');
@@ -199,7 +200,7 @@ class Map {
 					return;
 				}
 				item.deleteList2.push(id);
-				if (Math.floor(id / 5) >= 4) {
+				if (Math.floor(id / 5) >= 5) {
 					return;
 				}
 				this.canDeleteDirct(item, id + 5, type, 'bottom');
@@ -223,27 +224,29 @@ class Map {
 		if (deleteList && deleteList.length >= 3) {
 			for (var i = 0; i < deleteList.length; i++) {
 				var itemId = deleteList[i];
-				MapData[Math.floor(itemId / 5)][itemId % 5].visible = false;
+				var item = MapData[Math.floor(itemId / 5)][itemId % 5];
+				item.visible = false;
+				game.removeChild(item);
 			}
 		}
 	}
 	dropItems() {
 		dropCols = [];
-		// 过滤 
+		// 
+		deleteList = Array.from(new Set(deleteList));
 		for (var index = 0; index < deleteList.length; index++) {
 			var element = deleteList[index];
 			var col = element % 5;
 			var row = Math.floor(element / 5);
 			if (dropCols.indexOf(col) == -1) {
 				dropCols.push(col);
-				drop[col].num = drop[col].num + 1;
 				drop[col].row = row;
 			} else {
-				drop[col].num++;
 				if (drop[col].row > row) {
 					drop[col].row = row;
 				}
 			}
+			drop[col].num++;
 		}
 		for (var index = 0; index < dropCols.length; index++) {
 			var col = dropCols[index];
@@ -251,15 +254,12 @@ class Map {
 			var num = drop[col].num;
 			for (var i = maxRow - 1; i >= 0; i--) {
 				var item = MapData[i][col];
-				MapData[i][col].location += num * 5;
 				MapData[i + num][col] = item;
+				MapData[i + num][col].location = (i + num) * 5 + col;
                 list.push(item);
 				var y = 140 + i * 70 + num * 70;
-				MapData[i][col].y = y - 40;
-				Laya.Tween.to(item, {
-					y: y
-				},
-				100);
+				MapData[i + num][col].y = y - 40;
+				Laya.Tween.to(item, {y : y}, 100);
 			}
 		}
 	}
@@ -276,17 +276,29 @@ class Map {
 				MapData[i][col].skin = 'view/play_img' + MapData[i][col].type + '.png';
 				game.addChild(MapData[i][col].pos(50 + col * 60, 100 + i * 70));
                 list.push(MapData[i][col]);
-                Laya.Tween.to(MapData[i][col],{y : 140 + i * 70},150);
+                Laya.Tween.to(MapData[i][col], {y : 140 + i * 70}, 100);
 			}
 			drop[col].row = 0;
 			drop[col].num = 0;
 		}
 	}
 	updateMap() {
-		for (var i = 0; i < MapData.length; i++) {
-			for (var j = 0; j < MapData[i].length; j++) {
-				MapData[i][j].pos(50 + j * 60, 140 + i * 70);
+		
+		for (var i = MapData.length - 1; i >= 0; i--) {
+			for (var j = MapData[i].length - 1; j >= 0; j--) {
+				MapData[i][j].location = i * 5 + j;
+				MapData[i][j].pos(50 + j * 60, 140 +i * 70);
+				MapData[i][j].flag = true;
+				if(! MapData[i][j].parent){
+					game.addChild(MapData[i][j]);
+				}
 			}
 		}
+		game._childs.forEach(function(element) {
+			if(!element.flag){
+				game.removeChild(element.flag);
+			}
+			element.flag = false;
+		}, this);
 	}
 };

@@ -5,7 +5,6 @@ var Dialog=laya.ui.Dialog;
 var viewUI=(function(_super){
 		function viewUI(){
 			
-		    this.play_background=null;
 
 			viewUI.__super.call(this);
 		}

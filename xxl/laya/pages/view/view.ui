@@ -7,24 +7,12 @@
     "nodeParent":-1,
     "label":"View",
     "isOpen":true,
-    "isDirectory":true,
+    "isDirectory":false,
     "isAniNode":true,
-    "hasChild":true,
+    "hasChild":false,
     "compId":1,
     "child":[
-        {
-            "x":15,
-            "type":"Image",
-            "props":{"y":141,"x":43,"width":328,"visible":true,"var":"play_background","skin":"view/play_background.png","oy":122,"ox":41,"ownType":"Image","name":"background","height":454,"alpha":1},
-            "nodeParent":1,
-            "label":"Image(play_background)",
-            "isDirectory":false,
-            "isAniNode":true,
-            "hasChild":false,
-            "compId":23,
-            "child":[
-                ]
-        }],
+        ],
     "animations":[
         {
             "nodes":[
